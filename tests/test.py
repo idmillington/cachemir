@@ -5,7 +5,7 @@ class Foo(object):
     """
     Test class
     """
-    @cachemir.cache('foo_pdf')
+    @cachemir.cache('get_foo_pdf')
     def _create_foo_pdf(self, out, *args, **kws):
         """
         Creates the actual cached version of the foo in the given

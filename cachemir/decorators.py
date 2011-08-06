@@ -22,12 +22,12 @@ def init_cache(Class):
         fn = getattr(Class, fn_name)
         if callable(fn) and hasattr(fn, "__cache_config"):
             # Find the cache configuration
-            name, uid_fn, storage, hash_fn = fn.__cache_config
+            name, uid_fn, storage_obj, hash_fn = fn.__cache_config
 
             # Use default storage in a temporary directory if we don't
             # have one.
-            if storage is None:
-                storage = storage.CacheFileStorage()
+            if storage_obj is None:
+                storage_obj = storage.CacheFileStorage()
 
             # Create the get function
             def __get(self, *args, **kws):
@@ -40,11 +40,11 @@ def init_cache(Class):
                     data_hash = uid
 
                 # See if we have copy.
-                if not storage.has(data_hash):
+                if not storage_obj.has(data_hash):
                     # Do this the explicit way (rather than the newer
                     # 'with' statement) as not every file-like may be a
                     # context.
-                    out = storage.out(data_hash)
+                    out = storage_obj.out(data_hash)
                     try:
                         # Create the data.
                         fn(self, out, *args, **kws)
@@ -52,15 +52,14 @@ def init_cache(Class):
                         out.close()
 
                     # Sanity check
-                    assert storage.has(data_hash)
+                    assert storage_obj.has(data_hash)
 
                 # Created or not, return the file-like for the data.
-                return storage.get(data_hash)
+                return storage_obj.get(data_hash)
 
             # Save the get function
-            get_fn_name = "get_%s" % name
-            __get.__name__ = get_fn_name
-            setattr(Class, get_fn_name, __get)
+            __get.__name__ = name
+            setattr(Class, name, __get)
 
             # Remove the config data.
             del fn.im_func.__cache_config

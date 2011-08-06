@@ -30,7 +30,7 @@ class CacheStorage(object):
         """
         pass
 
-class CacheLocalStorage(object):
+class CacheLocalStorage(CacheStorage):
     """
     Implements a naive local dictionary based storage for data. This
     is highly sensitive to running out of memory, so is best used for
@@ -58,7 +58,7 @@ class CacheLocalStorage(object):
                 super(LocalCacheStringIO, self).close(*args, **kws)
         return LocalCacheStringIO()
 
-class CacheFileStorage(object):
+class CacheFileStorage(CacheStorage):
     """
     Stores the cached data in a directory on the hard-drive.
     """
@@ -68,21 +68,25 @@ class CacheFileStorage(object):
             directory = tempfile.mkdtemp()
         self._directory = directory
 
-    def _get_path(self, data_hash):
+    def get_path(self, data_hash):
+        """
+        Figures out where to store the cached data. Override this to
+        change the way filenames are calculated.
+        """
         return os.path.join(self._directory, data_hash[:2], data_hash)
 
     def has(self, data_hash):
-        return os.path.exists(self._get_path(data_hash))
+        return os.path.exists(self.get_path(data_hash))
 
     def get(self, data_hash):
         try:
-            return file(self._get_path(data_hash), 'rb')
+            return file(self.get_path(data_hash), 'rb')
         except IOError:
             return KeyError(data_hash)
 
     def out(self, data_hash):
-        diry = os.path.join(self._directory, data_hash[:2])
-        fn = os.path.join(diry, data_hash)
+        fn = self.get_path(data_hash)
+        diry = os.path.dirname(fn)
         if not os.path.exists(diry):
             os.makedirs(diry)
         return file(fn, 'wb')
