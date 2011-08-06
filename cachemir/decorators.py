@@ -1,3 +1,4 @@
+import hashlib
 import storage
 
 def cache(name, uid_fn=lambda x:str(hash(x)), storage=None, hash_fn=None):
@@ -35,9 +36,17 @@ def init_cache(Class):
                 if hash_fn is not None:
                     data_hash = hash_fn(self, *args, **kws)
                 else:
-                    uid = uid_fn(self)
-                    # TODO: Add the args and kws values to the hash.
-                    data_hash = uid
+                    elements = [uid_fn(self)]
+                    elements.extend([
+                            str(hash(arg)) for arg in args
+                            ])
+                    elements.extend([
+                            (key, str(hash(kws[key])))
+                            for key in sorted(kws.keys())
+                            ])
+
+                    # Do a SHA1 on the Python repr of the elements.
+                    data_hash = hashlib.sha1(repr(elements)).hexdigest()
 
                 # See if we have copy.
                 if not storage_obj.has(data_hash):
