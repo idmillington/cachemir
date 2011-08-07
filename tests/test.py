@@ -4,7 +4,7 @@ import cachemir
 class CachemirTestCase(unittest.TestCase):
     def setUp(self):
         # Create the example class.
-        @cachemir.init_cache
+        @cachemir.cache_init
         class Foo(object):
             """
             Test class

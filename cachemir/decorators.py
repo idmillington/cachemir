@@ -15,7 +15,7 @@ def cache(name, uid_fn=lambda x:str(hash(x)), storage=None, hash_fn=None):
         return fn
     return _decorator
 
-def init_cache(Class):
+def cache_init(Class):
     """
     Go through each cached method and add the relevant methods.
     """
