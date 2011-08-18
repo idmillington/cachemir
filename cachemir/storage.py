@@ -62,10 +62,11 @@ class CacheFileStorage(CacheStorage):
     """
     Stores the cached data in a directory on the hard-drive.
     """
-    def __init__(self, directory=None):
+    def __init__(self, directory=None, suffix=""):
         if directory is None:
             # Make a temporary directory.
             directory = tempfile.mkdtemp()
+        self._suffix = suffix
         self._directory = directory
 
     def get_path(self, data_hash):
@@ -73,7 +74,8 @@ class CacheFileStorage(CacheStorage):
         Figures out where to store the cached data. Override this to
         change the way filenames are calculated.
         """
-        return os.path.join(self._directory, data_hash[:2], data_hash)
+        fn = data_hash + self._suffix
+        return os.path.join(self._directory, data_hash[:2], fn)
 
     def has(self, data_hash):
         return os.path.exists(self.get_path(data_hash))
