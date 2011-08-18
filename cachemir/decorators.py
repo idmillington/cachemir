@@ -72,9 +72,15 @@ def cache_init(Class):
     Go through each cached method and add the relevant methods.
     """
     for fn_name in dir(Class):
-        fn = getattr(Class, fn_name)
-        if callable(fn) and hasattr(fn, "__cache_config"):
-            __init_cache_fn(Class, fn)
+        try:
+            fn = getattr(Class, fn_name)
+        except AttributeError:
+            # We get this from django if we try to access a 'Creator'
+            # field.
+            pass
+        else:
+            if callable(fn) and hasattr(fn, "__cache_config"):
+                __init_cache_fn(Class, fn)
 
     # The class is modified, but we don't need to return a proxy.
     return Class
