@@ -38,7 +38,7 @@ class CacheLocalStorage(CacheStorage):
     """
     def __init__(self, BufferClass=StringIO):
         self._data = {}
-        self._BufferClass
+        self._BufferClass = BufferClass
 
     def has(self, data_hash):
         return data_hash in self._data
@@ -50,12 +50,13 @@ class CacheLocalStorage(CacheStorage):
         # Create a new StringIO that tracks when it is closed and
         # only then stores the data.
         that = self
-        class LocalCacheStringIO(self._BufferClass):
+        BufferClass = self._BufferClass
+        class LocalCacheStringIO(BufferClass):
             def close(self, *args, **kws):
                 # Store first, as closing destroys the buffer.
                 that._data[data_hash] = self.getvalue()
                 # Close as normal.
-                super(LocalCacheStringIO, self).close(*args, **kws)
+                BufferClass.close(self, *args, **kws)
         return LocalCacheStringIO()
 
 class CacheFileStorage(CacheStorage):
