@@ -54,9 +54,6 @@ def __init_cache_fn(Class, fn):
             finally:
                 out.close()
 
-            # Sanity check
-            assert storage_obj.has(data_hash)
-
         # Created or not, return the file-like for the data.
         return storage_obj.get(data_hash)
 

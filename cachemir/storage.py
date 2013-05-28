@@ -37,8 +37,8 @@ class CacheLocalStorage(CacheStorage):
     smaller pieces of content.
     """
     def __init__(self, BufferClass=StringIO):
-        self._data = {}
         self._BufferClass = BufferClass
+        self._data = {}
 
     def has(self, data_hash):
         return data_hash in self._data
@@ -58,6 +58,15 @@ class CacheLocalStorage(CacheStorage):
                 # Close as normal.
                 BufferClass.close(self, *args, **kws)
         return LocalCacheStringIO()
+
+class NullStorage(CacheLocalStorage):
+    """
+    Local storage that claims it can't find the content (even though
+    it can). This is useful for debugging when you want the content to
+    be regenerated each time.
+    """
+    def has(self, data_hash):
+        return False
 
 class CacheFileStorage(CacheStorage):
     """
